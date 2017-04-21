@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Cabin" rel="stylesheet">
+    <script src="http://d3js.org/d3.v4.min.js"></script>
+    <script src="http://d3js.org/topojson.v2.min.js"></script>
+    <style>
+        body {
+            background-color: azure;
+        }
+
+        svg.map {
+            border: 0px solid steelblue;
+            background-color: white;
+            padding: 0px;
+            margin-left: -8px;
+        }
+
+        svg.miniGraph {
+          padding:0px;
+          margin:0px;
+          margin-left:-8px;
+        }
+
+        h1 {
+            padding: 0px;
+            margin: 0px;
+            font-size:54px;
+            font-family:"Cabin";
+        }
+
+        h3{
+          font-family:"Cabin";
+        }
+
+        div.title {
+            background-color: #063C71;
+            width: 100vw;
+            padding-top: 25px;
+            padding-bottom: 15px;
+            margin-top: -8px;
+            margin-left: -8px;
+            color: white;
+        }
+        g text {
+          font-size:8px;
+        }
+        text.legendText{
+          font-size: 12px;
+          font-family:"Cabin";
+        }
+        .floatr{
+          float:right;
+        }
+        .d {
+          float:left;
+        }
+
+        #s11{
+          float:right;
+        }
+        /*US graph centered*/
+
+    </style>
+
+</head>
+
+<body>
+    <div class='title'>
+        <h1 style='text-align: center;'>Recipients of U.S. Foreign Aid</h1>
+        <h3 style='text-align: center;'>Danny Yang, Priyanka Rathnam, Byungchan Lim</h3>
+        <h3 style='text-align: center;'>CS 3300 Project 1 - Static Data Visualization</h3>
+        <hr>
+    </div>
+    <div id='map'></div>
+    <div id="d11" class="us"></div>
+    <div class="floatr">
+        <div id="d1" class="d"></div>
+        <div id="d2" class="d"></div>
+        <div id="d3" class="d"></div>
+        <div id="d4" class="d"></div>
+        <div id="d5" class="d"></div>
+    </div>
+    <div class="floatr">
+        <div id="d6" class="d"></div>
+        <div id="d7" class="d"></div>
+        <div id="d8" class="d"></div>
+        <div id="d9" class="d"></div>
+        <div id="d10" class="d"></div>
+    </div>
+    <h1 style='padding-top:20px; padding-bottom:0px; margin:0px;'>Top Ten Aid Recipients Breakdown</h1>
+    <h3 style='padding-top:2px; margin:0px;font-size: 18px;color:#415D78;'>By Happiness Index, Human Development Index, Democracy Index</h3>
+
+
+    <script>
+        var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+        var height = width * 480 / 960
+
+        var svg = d3.select("#map").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("class", "map");
+
+        var projection = d3.geoEquirectangular()
+            .scale(153 * width / 960)
+            .translate([width / 2, height / 2])
+
+        var path = d3.geoPath()
+            .projection(projection);
+
+        var world;
+        var countries;
+        var features;
+        var centers;
+        var uscenter;
+        /*
+        var hdiScale = d3.scaleLinear() // unused
+            .domain([0.0, 1.0])
+            .range(["gray", "green"]);
+
+        var happinessScale = d3.scaleLinear() //unused
+            .domain([2, 8])
+            .range(["black", "deepskyblue"]);
+
+        var democracyScale = d3.scaleLinear() //unused
+            .domain([1, 8])
+            .range(["red", "limegreen"]);
+
+        var govtScale = d3.scaleOrdinal() //unused
+            .domain(['Authoritarian', 'Hybrid regime', 'Flawed democracy', 'Full democracy'])
+            .range(["red", "orange", 'yellow', 'limegreen']);
+*/
+        var aidScale = d3.scaleLog()
+            .domain([1, 1000000000000])
+            .range([1, 12]); //outputs an approximation of the number of zeroes the aid figure has
+
+        var aidScale2 = d3.scaleQuantize() //used for coloring the map for aid (the last two are not supposed to appear at all)
+            .domain([1, 12])
+            .range(["lightblue", "lightblue", "lightblue", "powderblue", "powderblue", "skyblue", "lightskyblue", "cornflowerblue", "royalblue", "blue", "blue", "blue"]);
+/*
+        var aidScale3 = d3.scaleQuantize() //unused//used for sizing bubbles, feel free to adjust (the last two values are not supposed to appear on map)
+            .domain([1, 12])
+            .range([0, 0, 0, 0, 1, 1, 2, 4, 8, 16, 50, 50]);
+
+        var aidScale4 = d3.scaleQuantize() //unused//used for sizing bubbles, feel free to adjust (the last two are not supposed to appear on map)
+            .domain([1, 12])
+            .range([0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 50, 50]);
+*/
+        var aidScale5 = d3.scaleLinear() //used for path width, feel free to adjust
+            .domain([300000000, 1300000000])
+            .range([3, 13]);
+
+        var aidScale6 = d3.scaleLog() //used for one of the axes
+            .domain([0.001,1300])
+            .range([0,width*0.2])
+
+        var aidScale7 = d3.scaleLinear() //used for path opacity, feel free to adjust
+            .domain([0, 1300000000])
+            .range([0.3, 0.9]);
+
+        var aidScale8 = d3.scaleLinear() //used for one of the axes
+            .domain([300, 1300])
+            .range([0, width*0.2]);
+
+        var colorAxis = d3.axisBottom(aidScale6);
+        var pathAxis=d3.axisBottom(aidScale8);
+
+        var pathsLegend;
+        var colorLegend;
+
+        d3.json("world-50m.json", function(raw) {
+            world = raw;
+            d3.csv("combinedData2.csv", function(data) {
+                clist = world.objects.countries.geometries;
+                clist.forEach(function(x) {
+                    x.properties = {
+                        hdi: undefined,
+                        happiness: undefined,
+                        democracy: undefined,
+                        aid: undefined,
+                        govt: undefined
+                    };
+                    data.forEach(function(y) {
+                        if (x.id == y.country_id) {
+                            x.properties.hdi = y.hdi;
+                            x.properties.aid = y.current_amount;
+                            x.properties.happiness = y.happiness;
+                            x.properties.democracy = y.democracy_score
+                            x.properties.govt = y.government;
+                            x.properties.name = y.country;
+                        }
+                    }); //end foreach
+                }); //end foreach
+                showmap();
+                showgraphs();
+            }); //end csv
+        }); //end json
+
+        function showmap() {
+            countries = topojson.feature(world, world.objects.countries);
+            features = topojson.feature(world, world.objects.countries).features;
+            centers = features.map(function(x) {
+                if (x.id == 840) {
+                    uscenter = path.centroid(x);
+                }
+                return [path.centroid(x), x.properties.aid];
+            }); //this finds the centroid of the country
+
+
+
+            var country_borders = svg.selectAll("path.boundary")
+                .data(countries.features)
+                .enter().append("path")
+                .attr("class", "boundary")
+                .attr("stroke", "white")
+                .attr("stroke-width", "0.25px")
+                .attr("d", path)
+                .attr("fill", function(x) {
+                    //replace with other variables to view other data
+                    if (x.properties.aid == 'NA' || x.properties.aid == undefined || x.properties.aid <= 0) {
+                        return "lightblue";
+                    }
+                    //replace with different scale/variable to view other data, aid has a special format due to 2 scales
+                    //return democracyScale(x.properties.democracy)
+                    return aidScale2(aidScale(Number(x.properties.aid)));
+                }); // end country_borders creation
+
+            /*var bubbles = svg.selectAll("circle.bubble").data(centers) //feel free to adjust styling
+              .enter().append("circle")
+              .attr("class","bubble")
+              .attr("fill", "blue")
+              .attr("opacity",0.5)
+              .attr("r", function (x){
+                if (x[1]=='NA' || x[1]==undefined || x[1]<10000){
+                  return 0;
+                }
+                return aidScale3(aidScale(x[1]));
+              })
+              .attr("cx", function (x){ return x[0][0]; })
+              .attr("cy", function (x){ return x[0][1]; });//end bubbles creation*/
+
+            var paths = svg.selectAll("path.aid").data(centers)
+                .enter().append("path")
+                .attr("class", "aid")
+                //.attr("opacity",0.5)
+                .attr("stroke", "#063C71")
+                .style("stroke-linejoin", "round")
+                .style("stroke-linecap", "round")
+                .attr("stroke-width", function(x) {
+                    if (x[1] == 'NA' || x[1] == undefined || x[1] < 319000000) {
+                        return 0;
+                    }
+                    return aidScale5(x[1]);
+                })
+                .attr("opacity", function(x) {
+                    return aidScale7(x[1]);
+                })
+                .attr("fill", "none")
+                .attr("d", function(x) {
+                    if (x[1] == 'NA' || x[1] == undefined || x[1] < 319000000) {
+                        return;
+                    }
+                    x1 = uscenter[0]
+                    y1 = uscenter[1]
+                    x2 = x[0][0]
+                    y2 = x[0][1]
+
+                    if (x[1] > 1200000000) {
+                        d = "M" + x1.toString() + " " + y1.toString() + "C" + (x1 * 2).toString() + ' ' + (y1 * 0.1).toString() + ',' + (x2 * 0.85).toString() + ' '+(y2 * 0.25).toString() + ',' + x2.toString() + ' ' + y2.toString();
+                    } else {
+                        d = "M" + x1.toString() + " " + y1.toString() + "C" + (x1 * 2).toString() + ' ' + (y1 * 0.25).toString() + ',' + (x2 * 0.9).toString() + ' '+(y2 * 0.5).toString() + ',' + x2.toString() + ' ' + y2.toString();
+                    }
+
+                    return d;
+              });
+
+              //sample gradients for axes
+                for (var i=0;i<=width*0.2;i++){
+                  svg.append("path")
+                      .attr("stroke", "#063C71")
+                      .attr("opacity", function(x){
+                        return 0.3+i/(0.2*width)*0.5;
+                      })
+                      .attr("d","M"+i.toString()+" 0 h 1")
+                      .attr("stroke-width", function(x){
+                        return 3+i/(width*0.2)*10;
+                      })
+                      .attr("transform", "translate(25,"+(height*.75).toString()+")");
+                  svg.append("path")
+                    .attr("d","M"+i.toString()+" 0 h 1")
+                    .attr("stroke-width",15)
+                    .attr("stroke",function(x){
+                      return aidScale2(i/(width*0.2)*10);
+                    })
+                    .attr("transform", "translate(25,"+(height*.75-65).toString()+")");
+                }
+              //axes and labels
+              svg.append("g").attr("transform","translate(25,"+(height*.75+10).toString()+")").call(pathAxis);
+              pathsLegend = svg.append("text")
+              .attr("class","legendText")
+              .attr("transform","translate(25,"+(height*.75-14).toString()+")")
+              .style("font-family","Cabin")
+              .text("Top ten aid recipients (millions USD)");
+
+              svg.append("g").attr("transform","translate(25,"+(height*.75-50).toString()+")").call(colorAxis);
+              colorLegend = svg.append("text")
+              .attr("class","legendText")
+              .attr("transform","translate(25,"+(height*.75-80).toString()+")")
+              .text("Aid Recieved (millions USD)");
+
+
+
+        } //end showmap
+        ///////////////////////////////////////////////////////////////////////////////////////////////////
+        //for the small graphs on the bottom
+        ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+        var outlineProjection = d3.geoMercator().scale(75);
+        var makeOutlines = d3.geoPath().projection(outlineProjection);
+        var countryData;
+        var worldData;
+        var outlineCountries;
+        var svgHeight = width / 5;
+        var svgWidth = width / 5;
+
+/*      secondary file loading data, unused
+        function parseLine(line) {
+            line.current_amount = Number(line.current_amount);
+            line.democracy_score = Number(line.democracy_score);
+            line.happiness = Number(line.happiness);
+            line.hdi = Number(line.hdi);
+            return line;
+        }
+        d3.queue()
+          .defer(d3.csv, "combinedData2.csv", parseLine)
+          .defer(d3.json, "world-50m.json")
+          .await(showData);
+*/
+        function showgraphs() {
+            countryData = world.objects.countries.geometries;
+            worldData = world;
+
+            // set the x axis of the bar graph to show HDI, Hapiness, and Democracy using scaleBand
+            var xExtent = ["Happiness", "HDI", "Democracy"];
+            var xScale = d3.scaleBand().domain(xExtent).range([svgWidth * 0.2, svgHeight * 0.8]).padding(0.1);
+            var xAxis = d3.axisBottom(xScale);
+            //make Democracy, HDI, and Hapiness Scales based on their domains
+            var demScale = d3.scaleLinear().domain([0, 10]).range([svgWidth * 0.8, svgHeight * 0.2]);
+            var hapScale = d3.scaleLinear().domain([0, 10]).range([svgWidth * 0.8, svgHeight * 0.2]);
+            var hdiScale = d3.scaleLinear().domain([0, 1]).range([svgWidth * 0.8, svgHeight * 0.2]);
+            //make the y axis based on a 0-10 domain
+            var indexAxis = d3.axisLeft(demScale);
+
+            var topTen = [];
+            //function below is used to sort the top 10 countries receiving aid
+            function compareAid(country1, country2) {
+                if (country1.properties.aid < country2.properties.aid) {
+                    return 1;
+                }
+                if (country1.properties.aid > country2.properties.aid) {
+                    return -1;
+                }
+                return 0;
+            }
+
+            //for each country, if the amount of aid is over 319000000, add it to the array of the top 10 countries
+            countryData.forEach(function(country) {
+                if (country.properties.aid >= 319000000 || country.properties.name == "United States") {
+                    topTen.push(country);
+                }
+            });
+            //sort the top 10 array based on aid
+            topTen.sort(compareAid);
+
+
+            var count = 1;
+            topTen.forEach(function(country) {
+
+                //round the democracy value and if it is null, set the value to N/A (for South Sudan)
+                var democracyValue = Math.round(country.properties.democracy * 10) / 10;
+                if (!(country.properties.democracy >= 0)) {
+                    country.properties.democracy = 0;
+                    democracyValue = "N/A"
+                }
+
+                //add an svg for each country with a class based on which # country it is (US is specially centered)
+                var svg = d3.select("#d" + count.toString())
+                    .append("svg")
+                    .attr("class", "miniGraph")
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .attr("id", "s" + count.toString());
+
+                //add title to each graph
+                svg.append("text")
+                    .style("text-anchor", "middle")
+                    .style("dominant-baseline", "central")
+                    .attr("x", svgWidth / 2)
+                    .attr("y", svgHeight / 10)
+                    .attr("font-size", "14")
+                    .style("font-family", "Cabin")
+                    .text(country.properties.name);
+
+                //add the x axis to the graph
+                svg.append("g")
+                    .attr("transform", "translate(0," + (svgHeight * 0.8).toString() + ")")
+                    .call(xAxis)
+                    .style("font-family", "Cabin")
+                    .style("font-size", "9");
+
+                //add the y axis to the graph
+                svg.append("g")
+                    .attr("transform", "translate(" + (svgWidth * 0.2).toString() + " 0)")
+                    .call(indexAxis)
+                    .style("font-family", "Cabin")
+                    .style("font-size", "8");
+
+
+                //add the HDI bar to the graph based on the xScale and the hdiScale
+                svg.append("rect")
+                    .attr("rx", "3")
+                    .attr("ry", "3")
+                    .attr("x", xScale("HDI"))
+                    .attr("width", xScale.bandwidth())
+                    .attr("y", hdiScale(country.properties.hdi))
+                    .attr("height", svgHeight * 0.8 - hdiScale(country.properties.hdi))
+                    .style("fill", "#415D78");
+
+                //add the HDI value on top of the bar, multiply value by 10 to scale it from 0 to 1 to 1 to 10
+                svg.append("text")
+                    .attr("x", xScale("HDI") + .5 * xScale.bandwidth())
+                    .attr("y", hdiScale(country.properties.hdi) - 2)
+                    .style("text-anchor", "middle")
+                    .style("dominant-baseline", "bottom")
+                    .style("font-family", "Cabin")
+                    .attr("font-size", "10")
+                    .text(Math.round(country.properties.hdi * 100) / 10);
+
+                //add the Happiness bar to the graph based on the xScale and the hapScale
+                svg.append("rect")
+                    .attr("rx", "3")
+                    .attr("ry", "3")
+                    .attr("x", xScale("Happiness"))
+                    .attr("width", xScale.bandwidth())
+                    .attr("y", hapScale(country.properties.happiness))
+                    .attr("height", svgHeight * 0.8 - hapScale(country.properties.happiness))
+                    .style("fill", "#3D6E9E");
+
+                //add the rounded happiness value to the bar
+                svg.append("text")
+                    .attr("x", xScale("Happiness") + .5 * xScale.bandwidth())
+                    .attr("y", hapScale(country.properties.happiness) - 2)
+                    .style("text-anchor", "middle")
+                    .style("dominant-baseline", "bottom")
+                    .style("font-family", "Cabin")
+                    .attr("font-size", "10")
+                    .text(Math.round(country.properties.happiness * 10) / 10);
+
+                //add the Democracy bar to the graph based on the xScale and the demScale
+                svg.append("rect")
+                    .attr("rx", "3")
+                    .attr("ry", "3")
+                    .attr("x", xScale("Democracy"))
+                    .attr("width", xScale.bandwidth())
+                    .attr("y", demScale(country.properties.democracy))
+                    .attr("height", svgHeight * 0.8 - demScale(country.properties.democracy))
+                    .style("fill", "#063C71");
+
+                //add the rounded democracy value to the bar
+                svg.append("text")
+                    .attr("x", xScale("Democracy") + .5 * xScale.bandwidth())
+                    .attr("y", hapScale(country.properties.democracy) - 2)
+                    .style("text-anchor", "middle")
+                    .style("dominant-baseline", "bottom")
+                    .style("font-family", "Cabin")
+                    .attr("font-size", "10")
+                    .text(democracyValue);
+
+                //if the country isn't the United States we want a silhouette of it
+                if (country.properties.name != "United States") {
+                    //for each country in world-50m.json, if its id matches one of our top 10...
+                    for (var i = 0; i < worldData.objects.countries.geometries.length; i++) {
+                        if (worldData.objects.countries.geometries[i].id == country.id) {
+
+                            //make the projection and a path generator for the silhouettes
+                            outlineCountries = topojson.feature(worldData, worldData.objects.countries.geometries[i]);
+                            outlineProjection.fitExtent([
+                                [.6 * svgWidth, 0],
+                                [.8 * svgWidth, (30 / 50) * svgHeight]
+                            ], outlineCountries);
+                            makeOutlines = d3.geoPath().projection(outlineProjection);
+
+                            //add the silhouette by merging the paths to the svg for the country
+                            var paths = svg.selectAll("path.country").data([outlineCountries]);
+                            paths.enter().append("path").attr("class", "country")
+                                .merge(paths)
+                                .attr("d", function(country_outline) {
+                                    return makeOutlines(country_outline);
+                                });
+
+                            //format the amount of aid and replace G with B for billion, add it to the svg
+                            var text = d3.format(".2s")(country.properties.aid);
+                            var newtext = text.replace(/G/, "B");
+                            newtext = "$"+newtext;
+                            svg.append("text")
+                                .attr("x", svgWidth * .35)
+                                .attr("y", svgHeight * .25)
+                                .style("text-anchor", "middle")
+                                .style("dominant-baseline", "central")
+                                .style("font-family", "Cabin")
+                                .style("fill", "#6785A2")
+                                .attr("font-size", "10")
+                                .text(newtext);
+
+                        }
+                    }
+                }
+                count++;
+            });
+        }
+    </script>
+</body>
+
+</html>
