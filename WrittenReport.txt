@@ -1,0 +1,43 @@
+﻿Our dataset is a CSV containing identifying information about each country (name, id, 2 and 3 letter codes), along with the human development index, the happiness index, the democracy index, the government type (as determined by the democracy index), and the amount of foreign aid it receives from the United States. 
+
+
+The data we used originated from four different sources; the human development index was the most recent value for each country taken from the UN HDI dataset, the happiness index was from the UN World Happiness Report, the democracy index (and government type classification) was taken from the Economist Intelligence Unit, and the figures for foreign aid are the most recent values from a U.S. government dataset. 
+
+
+The four separate CSV’s were loaded into R as data frames and joined using outer joins based on country name, and then the data was manually checked for any duplicate entries resulting from different spellings of country names. In particular, the data from countries with both formal and informal names often did not join properly (North/South Korea, Congo, Ivory Coast, Somaliland, Vietnam, etc). The data for government type and the two and three letter codes for the countries are not used in our final visualization, but it is loaded and implemented and can be displayed with a few minor adjustments to the code. 
+
+
+The shape files were from the world-50m.json file that was included in the lecture notes, and the shapes were matched up with countries in our dataset based on the country code.
+
+
+The world map is displayed as an equirectangular projection; we used a map because it allows the geographic trends in U.S. aid spending to be easily visible. 
+The coloration of the countries was achieved by applying two scales, a logarithmic scale and a quantized scale. This results in a clear change in color for each order of magnitude in aid spending.
+
+
+The curved arcs were mapped between the US and the ten biggest aid recipients worldwide, to further highlight the monetary connection between the US and these countries. The thickness and opacity of the paths scales linearly with the amount of aid received from the US. 
+
+
+There are a number of other scales in our code which we do not use, they are commented out but remain in the code so that it can be repurposed to display the other variables in our dataset.
+
+
+The bottom half of our visualization consists of a series of small multiples showing information about the U.S. and the top ten foreign aid recipient countries. The HDI, Happiness, and Democracy scores are displayed in a bar graph for easy comparison, and the aid and country names are displayed as well. The graphs are associated with the country on the map both by the paths in the map above, and by a small silhouette of the country’s borders in the corner of each plot. The x scale of the bar graph for Happiness, HDI, and Democracy was created using d3’s scaleBand function. The scales for the 3 variables were linear. To show each variable clearly, each was given a distinct color. The numerical value is also shown above each bar.
+Our visualization gives information on how much foreign aid the United States gives out to countries all over the world. The web page is divided into two sections. The top part consists of a choropleth map that represents countries receiving more aid with a darker shade of blue. The map also has lines of different thickness coming out of the US to top ten countries that receive the most aid (the thicker the line, the more the aid). The bottom part has a more detailed breakdown of the top 10 aid recipients. Each country has its own bar graph displaying its HDI (Human Development Index), Happiness Index, and Democracy Index. 
+
+
+From the map, one can tell that Africa is displayed with the darkest shade of blue followed by Asia. This shows that African countries are the ones that receive the most aid, followed by Asian countries such as Pacific Island countries and China. The lines in the map coming from the US to the top ten aid recipients were also concentrated mostly around Africa. Another noticeable trend was that European countries, Russia, Australia, and North Korea received no aid at all. The most notable country was Afghanistan, receiving a much larger amount of aid than any other country.
+
+
+The bottom part shows that the Happiness Index and HDI values usually do not exceed 6 on the 10 scale, as expected of countries that require the most aid. Most of the countries did not exceed 4 on the democratic scale meaning that they have authoritarian or hybrid regimes. It was clear from comparing each graph to the U.S. graph that the countries have significantly lower scores for Happiness, HDI, and Democracy. One interesting visualization we decided to put in is the shape of the landmass of the top ten recipients above each corresponding bar graph in order to relate the top and bottom part of the page visually.
+
+
+Data Sources:
+HDI - http://hdr.undp.org/en/data
+
+
+Happiness - http://worldhappiness.report/ed/2016/
+
+
+Democracy Index - http://www.eiu.com/public/thankyou_download.aspx?activity=download&campaignid=DemocracyIndex2016
+
+
+Foreign aid - https://explorer.usaid.gov/data.html
