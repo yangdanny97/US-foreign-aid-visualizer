@@ -4,10 +4,10 @@
 <head>
     <meta charset="utf-8">
     <link href="https://fonts.googleapis.com/css?family=Cabin" rel="stylesheet">
-    <script src="https://d3js.org/d3.v4.min.js"></script>
-    <script src="https://d3js.org/topojson.v2.min.js"></script>
-    <script src="https://d3js.org/d3-color.v1.min.js"></script>
-    <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css'>
+    <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/topojson.v2.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/d3-color.v1.min.js"></script>
+    <link rel='stylesheet prefetch' type="text/css" href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css'>
     <style>
         body {
             background-color: azure;
@@ -59,9 +59,24 @@
             font-size:12px;
         }
 
+        g.countryChart text {
+            font-size:2em;
+        }
+
         input,button {
             color:black;
         }
+
+        .compare {
+            height:100vh;
+            width:45vw;
+            text-align:center;
+        }
+        
+        .autocomplete-suggestions { border: 1px solid #999; background: white; cursor: default; overflow: auto; }
+        .autocomplete-suggestion { padding: 10px 5px; white-space: nowrap; overflow: hidden; }
+        .autocomplete-selected { background: silver; }
+        .autocomplete-suggestions strong { font-weight: normal;}  
 
     </style>
 
@@ -85,17 +100,31 @@
             </div>
             <div class='col-md-5'>
                 <p><strong>Filter Foreign Aid Recipients by Amount (USD):</strong></p>
-                <input id="aidFilter" type="text" placeholder="Lower Bound"><input id="aidFilter2" type="text" placeholder="Upper Bound"><button id='setFilter'>Set Filter</button>
+                <input id="aidFilter" type="text" placeholder=" Lower Bound"><input id="aidFilter2" type="text" placeholder=" Upper Bound"><button id='setFilter'>Set Filter</button>
             </div>
         </div>
     </div>
     <div id='map'></div>
     <div id="tooltip" style='position:absolute;'></div>
-
-    <script src='scales.js'></script>
-    <script src='scripts.js'></script>
-    <script src='controller.js'></script>
+    <div class='title' style='text-align: center;'>
+        <h3 style='text-align: center;'>Country Comparison Tool</h3>
+        <div class='row'>
+            <div class='col-md-2 col-md-offset-3'> <input id="leftCountry" type="text" placeholder=" Country 1"></div>
+            <div class='col-md-2'><button id='compareBtn'> Compare Countries </button></div>
+            <div class='col-md-2'><input id="rightCountry" type="text" placeholder=" Country 2"></div>
+            <div class='col-md-3'></div>
+        </div>
+    </div>
+    <div class='row'>
+        <div id='leftCompare' class='col-md-6 compare text-center'></div>
+        <div id='rightCompare' class='col-md-6 compare text-center'></div>
+    </div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
+    <script src='js/jquery.autocomplete.min.js'></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src='js/scales.js'></script>
+    <script src='js/scripts.js'></script>
+    <script src='js/controller.js'></script>
+    <script src='js/compare.js'></script>
 </body>
 </html>

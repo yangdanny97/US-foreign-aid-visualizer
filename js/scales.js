@@ -6,7 +6,7 @@
 
         var aidScaleColor = d3.scaleLinear()
             .domain([3, 9])
-            .range(["black","dodgerblue"])
+            .range(["#bbb","navy"])
             //.range(["lightblue", "lightblue", "lightblue", "powderblue", "powderblue", "skyblue", "lightskyblue", "cornflowerblue", "royalblue", "blue", "blue", "blue"]);
 
         var hdiScale = d3.scaleLinear()

@@ -1,3 +1,4 @@
+//setting up map and svg
         var height = width * 480 / 960;
 
         var svg = d3.select("#map").append("svg")
@@ -12,6 +13,7 @@
         var path = d3.geoPath()
             .projection(projection);
 
+//used for features on math
         var world;
         var countries;
         var features;
@@ -19,7 +21,10 @@
         var uscenter;
         var country_borders;
         var map_contents;
+        var paths;
+        var map;
 
+//used for legends on map
         var colorAxis;
         var pathAxis=d3.axisBottom(flowScale);
 
@@ -28,16 +33,18 @@
         var legend;
         var legendGradient;
 
+//used for tooltips
         var tooltipCountry;
         var tooltipAid;
         var tooltipMove;
         var tooltipOut;
 
-        var paths;
-        var map;
+//autocomplete for comparison tool
+        var countriesList = [];
+
         d3.queue()
-        .defer(d3.json,"world-50m.json")
-        .defer(d3.csv,"combinedData2.csv")
+        .defer(d3.json,"data/world-50m.json")
+        .defer(d3.csv,"data/combinedData2.csv")
         .await(function(error, raw, data){
             world = raw;
             clist = world.objects.countries.geometries;
@@ -57,6 +64,17 @@
                             x.properties.democracy = y.democracy_score
                             x.properties.govt = y.government;
                             x.properties.name = y.country;
+                            countriesList.push({
+                                value: y.country.toString(),
+                                data: {
+                                    aid: y.current_amount,
+                                    hdi: y.hdi,
+                                    happiness: y.happiness,
+                                    democracy: y.democracy_score,
+                                    govt: y.government,
+                                    name: y.country
+                                }
+                            });
                         }
                     });
                 });
@@ -102,7 +120,7 @@
               //sample gradients for axes
                 for (var i=0;i<=width*0.2;i++){
                   svg.append("path")
-                      .attr("stroke", "#063C71")
+                      .attr("stroke", "red")
                       .attr("opacity", function(x){
                         return 0.3+i/(0.2*width)*0.5;
                       })
