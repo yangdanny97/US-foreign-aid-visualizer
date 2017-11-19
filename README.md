@@ -1,7 +1,7 @@
 # US-foreign-aid-visualizer
 Dynamic Visualization for US Foreign Aid - built using d3.js
 
-View demo at: https://yangdanny97.github.io/US-foreign-aid-visualzer
+View demo at: https://yangdanny97.github.io/US-foreign-aid-visualizer
 
 I hope that this is a useful and interactive tool for visualizing global trends with American foreign aid spending with regards to measurements  such as HDI, democracy index, happiness index, etc.
 
