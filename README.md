@@ -21,6 +21,7 @@ To do list:
 - ~~remove small multiples below main map and reimpliment elsewhere~~
 
 ======================================
+
 Data Sources:
 
 HDI - http://hdr.undp.org/en/data
