@@ -21,11 +21,10 @@ var yAxis = d3.axisLeft(yScale);
 
 var tooltip = d3.select("#tooltip")
 .style("background-color","white")
-.style("border","solid black 1px")
 .style("padding","3px")
 .style("color","black")
 .style("display","inline-block")
-.style("visibility","visible")
+.style("opacity",0)
 .style("z-value","9999");
 
 filterBtn.on("click", function(){
@@ -185,12 +184,16 @@ function tooltipCountry (d){
         .style("dominant-baseline", "bottom")
         .style("font-family", "Cabin")
         .text(getText(d.properties.democracy));
-	return tooltip.style("visibility", "visible");
+    tooltip.transition()    
+    .duration(250)    
+    .style("opacity", 0.9); 
 }
 
 function tooltipAid(d){
 	tooltip.html("<p>Recipient: "+d[2]+"</p><div>Annual Aid: $"+addCommas(Number(d[1])).toString()+"</div>");
-	return tooltip.style("visibility", "visible");
+    tooltip.transition()    
+    .duration(250)    
+    .style("opacity", 0.9); 
 }
 
 /*tooltipMove is borrowed from my game of thrones visualization, originally written by a member of my group*/
@@ -213,6 +216,8 @@ function tooltipMove (d){
 }
 
 function tooltipOut(d){
-    return tooltip.style("visibility", "hidden");
+    tooltip.transition()    
+    .duration(250)    
+    .style("opacity", 0); 
 }
 

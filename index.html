@@ -77,9 +77,32 @@
         .autocomplete-suggestion { padding: 10px 5px; white-space: nowrap; overflow: hidden; }
         .autocomplete-selected { background: silver; }
         .autocomplete-suggestions strong { font-weight: normal;}  
+        .flowline {
+          stroke-dasharray: 15, 15;
+          animation: flow 1s linear infinite;
+          -webkit-animation: flow 1s linear infinite;
+        }
 
+        @keyframes flow {
+          from {
+            stroke-dashoffset: 30;
+          }
+
+          to {
+            stroke-dashoffset: 0;
+          }
+        }
+
+        @-webkit-keyframes flow {
+          from {
+            stroke-dashoffset: 30;
+          }
+
+          to {
+            stroke-dashoffset: 0;
+          }
+        }
     </style>
-
 </head>
 
 <body>
